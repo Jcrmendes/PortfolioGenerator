@@ -1,18 +1,46 @@
 package com.main.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.HashSet;
+import java.util.Set;
 
-
+/**
+ * @UniqueContraints -> IS for annotating multiple unique keys at the table level. To ensure a field value is unique, we can add @Column(unique=true)
+ */
 @Entity
-@Table(name = "PP_Users")
+@Table(name = "PG_Users",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = "username"), @UniqueConstraint(columnNames =  "email")
+        })
 public class User {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @NotBlank
+    @Size(max = 20)
     private String username;
+
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(max = 120)
     private String password;
-    @Temporal(TemporalType.TIMESTAMP)
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "PG_user_roles",
+               joinColumns = @JoinColumn(name = "user_id"),
+               inverseJoinColumns = @JoinColumn(name = "role_id"))
+
+    private Set<Role> roles = new HashSet<>();
     private long dt_create;
-    @Temporal(TemporalType.TIMESTAMP)
+
     private long dt_update;
 
     public User(){}
@@ -23,25 +51,22 @@ public class User {
         this.password = password;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false)
-    public int getId(){
+    public long getId() {
         return id;
     }
-    public void setId(int id){
+
+    public void setId(long id) {
         this.id = id;
     }
 
-    @Column(name = "username", nullable = false)
-    public String getUsername(){
+    public String getUsername() {
         return username;
     }
-    public void setUsername(String username){
+
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    @Column(name = "email", nullable = false)
     public String getEmail() {
         return email;
     }
@@ -50,7 +75,6 @@ public class User {
         this.email = email;
     }
 
-    @Column(name = "password", nullable = false)
     public String getPassword() {
         return password;
     }
@@ -59,7 +83,14 @@ public class User {
         this.password = password;
     }
 
-    @Column(name = "dt_create")
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     public long getDt_create() {
         return dt_create;
     }
@@ -68,24 +99,11 @@ public class User {
         this.dt_create = dt_create;
     }
 
-    @Column(name = "dt_update")
     public long getDt_update() {
         return dt_update;
     }
 
     public void setDt_update(long dt_update) {
         this.dt_update = dt_update;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", dt_create=" + dt_create +
-                ", dt_update=" + dt_update +
-                '}';
     }
 }
